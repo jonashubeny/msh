@@ -1,0 +1,16 @@
+{
+  "name": "miluj-svuj-hydrant",
+  "version": "0.1.0",
+  "description": "Webova galerie fotek hydrantu z cele Ceske republiky s mapou, laji a komentari.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

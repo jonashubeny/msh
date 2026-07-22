@@ -8,6 +8,7 @@
     "dev": "nodemon src/server.js"
   },
   "dependencies": {
+    "ejs": "^6.0.1",
     "express": "^4.19.2"
   },
   "devDependencies": {

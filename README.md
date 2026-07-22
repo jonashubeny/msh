@@ -1,7 +1,7 @@
 # Miluj svůj hydrant
 
 Webová galerie fotek hydrantů z celé České republiky – inspirováno instagramovým účtem
-[@miluj_svuj_hydrant](https://instagram.com). Uživatelé mohou fotky hydrantů prohlížet na mapě,
+[@miluj_svuj_hydrant](https://www.instagram.com/milujsvujhydrant/). Uživatelé mohou fotky hydrantů prohlížet na mapě,
 dávat jim lajky a psát komentáře. Po přihlášení může kdokoliv nahrát vlastní fotku hydrantu.
 
 ## Plánované funkce
@@ -12,6 +12,8 @@ dávat jim lajky a psát komentáře. Po přihlášení může kdokoliv nahrát 
 - [ ] Mapa se všemi hydranty (OpenStreetMap / Leaflet)
 - [ ] Lajky
 - [ ] Komentáře
+- [ ] Admin účty
+- [ ] Leaderboardy
 
 ## Tech stack
 

@@ -7,10 +7,13 @@ Doplněk k `main.md`, rozepsaný jen na databázi. Stav ke dni 2026-09-18.
 - [x] `npm install` proběhl, `node_modules/` je na místě
 - [x] `.env` existuje a má `DATABASE_URL`
 - [x] `src/db.js` vytváří `Pool` a exportuje ho – víc zatím netřeba
-- [ ] **PostgreSQL není nainstalovaný** – `psql`, `createdb` ani `pg_isready` nejsou v PATH
+- [x] PostgreSQL 18 nainstalovaný, služba běží (`pg_isready` odpovídá)
+- [x] Role `jonas` a databáze `miluj_svuj_hydrant` založené, spojení ověřené přes `\conninfo`
+- [x] `pg_hba.conf` přepsaný z `ident` na `scram-sha-256` (jinak `Ident authentication failed`)
+- [ ] Spustit `sudo -u postgres psql -c 'ALTER ROLE jonas NOSUPERUSER;'` – role je zbytečně superuživatel
 - [ ] `db/schema.sql` obsahuje jen komentáře, žádné `CREATE TABLE`
 
-Dokud neběží server Postgresu, nemá smysl psát žádnou routu, která sahá do databáze.
+Databáze běží a je připojitelná. Zbývá jediné, co blokuje všechno ostatní: napsat `schema.sql`.
 
 ---
 
@@ -44,6 +47,48 @@ Všechny cizí klíče mají `ON DELETE CASCADE`, takže smazání uživatele ne
 ### Session tabulka
 
 `connect-pg-simple` (krok 3 v `main.md`) si ukládá session do vlastní tabulky `session`. Tu **nepiš do `schema.sql`** – knihovna si ji vytvoří sama, když jí předáš `createTableIfMissing: true`. Jen o ní věz, ať tě nepřekvapí v `\dt`.
+
+### Sloupce, které teď nepiš
+
+Tabulku jde kdykoli rozšířit (`ALTER TABLE users ADD COLUMN ...`) bez ztráty dat, pokud
+nový sloupec má `DEFAULT` nebo připouští `NULL`. Nesnaž se proto vymyslet schéma dopředu
+dokonale – tohle přidej, až to bude potřeba:
+
+| sloupec | tabulka | kdy |
+|---|---|---|
+| `avatar_path` | `users` | až budou profily (cesta k souboru, ne binárka) |
+| `bio` | `users` | totéž |
+| `last_login_at` | `users` | až tě bude zajímat, kdo je aktivní |
+| `email_verified` | `users` | až budeš posílat e-maily |
+| `updated_at` | `users` | až půjde profil editovat – chce to trigger, `DEFAULT` sám nestačí |
+
+Naopak **nikdy** nepřidávej `like_count` nebo `hydrant_count` do `users`. Počty se dopočítají
+přes `COUNT(*)` z `likes` a `hydrants`; jako sloupec by se musely udržovat při každém lajku
+i při každé kaskádě a první, co se stane, je, že se rozejdou s realitou. Denormalizaci řeš,
+až bude leaderboard měřitelně pomalý – u galerie hydrantů z Česka to nenastane.
+
+### Sloupec `password_hash`
+
+```sql
+password_hash TEXT NOT NULL
+```
+
+Žádné další parametry. Konkrétně:
+
+- **Bez limitu délky.** Bcrypt hash má vždycky 60 znaků, ale kdybys přešel na argon2id,
+  je delší. `VARCHAR(60)` by tě uzamklo a migrace by pak byla zbytečná práce.
+- **Bez `UNIQUE`.** Dva lidé se stejným heslem mají díky soli různý hash, takže by to
+  nic nechytlo – a kdyby ano, znamenalo by to, že si sůl nepoužil správně.
+- **Bez indexu.** Podle hashe se nikdy nevyhledává. Vytáhneš řádek podle `username`
+  a porovnání dělá `bcrypt.compare()` v Node.js.
+- **Bez `DEFAULT`.** Účet bez hesla nesmí vzniknout.
+- **`NOT NULL`** povolit `NULL` by mělo smysl jedině u přihlašování přes Google apod.,
+  kde heslo neexistuje. To neděláš.
+
+Hash generuj `bcrypt.hash(password, 12)`. Sůl je uvnitř výsledného řetězce
+(`$2b$12$<22 znaků soli><31 znaků hashe>`), do databáze tedy nepatří vlastní sloupec na sůl.
+Pozor, bcrypt bere v potaz jen prvních **72 bajtů** hesla – s diakritikou to je míň než
+72 znaků, protože UTF-8 je vícebajtové.
 
 ---
 
@@ -104,15 +149,18 @@ GROUP BY u.id ORDER BY pocet DESC LIMIT 10;
 
 ## Kroky
 
-### 1. Rozběhnout Postgres
-- [ ] `sudo dnf install postgresql-server postgresql`
-- [ ] `sudo postgresql-setup --initdb`
-- [ ] `sudo systemctl enable --now postgresql`
-- [ ] `pg_isready` vrátí „accepting connections"
-- [ ] Založit databázového uživatele a databázi:
+### 1. Rozběhnout Postgres – HOTOVO
+- [x] `sudo dnf install postgresql-server postgresql`
+- [x] `sudo postgresql-setup --initdb`
+- [x] `sudo systemctl enable --now postgresql`
+- [x] `pg_isready` vrátí „accepting connections"
+- [x] Založit databázového uživatele a databázi:
       `sudo -u postgres createuser --interactive --pwprompt jonas`
       `sudo -u postgres createdb -O jonas miluj_svuj_hydrant`
-- [ ] Zkontrolovat, že `DATABASE_URL` v `.env` odpovídá tomu, co jsi právě založil
+- [x] `pg_hba.conf`: u řádků `127.0.0.1/32` a `::1/128` přepsat `ident` na `scram-sha-256`,
+      pak `sudo systemctl reload postgresql`
+- [x] Zkontrolovat, že `DATABASE_URL` v `.env` odpovídá tomu, co jsi právě založil
+- [ ] `ALTER ROLE jonas NOSUPERUSER;` – při `createuser` padlo „ano" na superuživatele
 
 ### 2. Napsat `db/schema.sql`
 - [ ] Na začátek `DROP TABLE IF EXISTS comments, likes, hydrants, users CASCADE;`

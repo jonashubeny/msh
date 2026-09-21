@@ -40,3 +40,7 @@ CREATE TABLE comments (
     text TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE INDEX ON hydrants (user_id);
+CREATE INDEX ON likes (hydrant_id);
+CREATE INDEX ON comments (hydrant_id);

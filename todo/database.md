@@ -11,9 +11,12 @@ Doplněk k `main.md`, rozepsaný jen na databázi. Stav ke dni 2026-09-18.
 - [x] Role `jonas` a databáze `miluj_svuj_hydrant` založené, spojení ověřené přes `\conninfo`
 - [x] `pg_hba.conf` přepsaný z `ident` na `scram-sha-256` (jinak `Ident authentication failed`)
 - [ ] Spustit `sudo -u postgres psql -c 'ALTER ROLE jonas NOSUPERUSER;'` – role je zbytečně superuživatel
-- [ ] `db/schema.sql` obsahuje jen komentáře, žádné `CREATE TABLE`
+- [x] `db/schema.sql` napsaný, všechny čtyři tabulky v databázi existují
+- [ ] `comments.text` nemá `NOT NULL` – projde prázdný komentář
+- [ ] Chybí indexy na cizí klíče (`hydrants.user_id`, `likes.hydrant_id`, `comments.hydrant_id`)
 
-Databáze běží a je připojitelná. Zbývá jediné, co blokuje všechno ostatní: napsat `schema.sql`.
+Schéma stojí a databáze je připojitelná. Zbývají dvě drobnosti výše, nic z toho neblokuje
+práci na routách a šablonách.
 
 ---
 

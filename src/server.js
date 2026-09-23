@@ -9,10 +9,9 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/', (req, res) => {
-    res.render('index', { title: 'Domovská stránka' });
-});
-
 app.listen(PORT, () => {
     console.log(`Server bezi na http://localhost:${PORT}`);
 });
+
+const hydrantsRouter = require('./routes/hydrants');
+app.use('/', hydrantsRouter);

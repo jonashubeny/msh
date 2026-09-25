@@ -15,3 +15,8 @@ app.listen(PORT, () => {
 
 const hydrantsRouter = require('./routes/hydrants');
 app.use('/', hydrantsRouter);
+
+app.use((err, req, res, next) => {
+    console.error(err);
+    res.status(500).send('Chyba serveru');
+});

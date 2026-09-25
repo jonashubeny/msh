@@ -6,7 +6,7 @@ Stav ke dni 2026-09-22.
 ## Stav
 
 - [x] `db/schema.sql` hotové, tabulky v databázi existují – routy mají odkud číst
-- [ ] `src/routes/hydrants.js` neexistuje, složka `routes/` je prázdná (jen `.gitkeep`)
+- [x] `src/routes/hydrants.js` neexistuje, složka `routes/` je prázdná (jen `.gitkeep`)
 - [ ] `src/server.js` má routu `GET /` napsanou přímo v sobě – přesunout do routeru
 - [ ] `src/views/` má jen `index.ejs`, žádné partials
 

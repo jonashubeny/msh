@@ -9,12 +9,12 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+const hydrantsRouter = require('./routes/hydrants');
+app.use('/', hydrantsRouter);
+
 app.listen(PORT, () => {
     console.log(`Server bezi na http://localhost:${PORT}`);
 });
-
-const hydrantsRouter = require('./routes/hydrants');
-app.use('/', hydrantsRouter);
 
 app.use((err, req, res, next) => {
     console.error(err);
